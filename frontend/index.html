@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crater and Boulder Detection</title>
+  <style>
+    body { margin: 0; overflow-x: hidden; background-color: #000; font-family: Arial, sans-serif; }
+    canvas { display: block; width: 100%; height: 100vh; object-fit: cover; }
+    .upload-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    .upload-container input[type="file"] {
+      margin: 10px;
+      padding: 10px;
+      background: linear-gradient(45deg, #1e90ff, #00bcd4);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .upload-container input[type="file"]:hover {
+      background: linear-gradient(45deg, #00bcd4, #1e90ff);
+    }
+    #detectButton {
+      margin: 10px;
+      padding: 12px 20px;
+      background: linear-gradient(90deg, #ff5722, #ff9800);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+    }
+    #detectButton:hover {
+      background: linear-gradient(90deg, #ff9800, #ff5722);
+      transform: scale(1.05);
+    }
+    .result {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: white;
+    }
+    .loading-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 12px;
+      color: white;
+      display: none;
+      text-align: center;
+    }
+    .team-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 50px;
+      background: #111;
+      
+    }
+    .team-member {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      color: white;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 0.5s ease-in-out, transform 0.3s ease;
+    }
+    .team-member img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .team-member.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .team-member:hover {
+      transform: translateY(0) scale(1.1);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+    }
+    .team-member:hover img {
+      transform: scale(1.2);
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.5);
+    }
+    .head {
+      font-weight: bolder;
+      color: aliceblue;
+      position: absolute;
+      top: 3vw;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2.5vw;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .head {
+        font-size: 4vw;
+        top: 5vw;
+      }
+    }
+    @media (max-width: 480px) {
+      .head {
+        font-size: 6vw;
+        top: 6vw;
+      }}
+    @media (max-width: 768px) {
+      .team-section {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="head">Crater & Boulder Detection</h1>
+  <div class="upload-container">
+    <h2 style="color: white;">Upload Image/Video for Detection</h2>
+    <input type="file" id="fileInput" accept="image/*,video/*" />
+    <button id="detectButton">Detect</button>
+  </div>
+  <div class="loading-box" id="loadingBox">Processing... Please wait. <br> Estimated Time Left: <span id="countdown">10</span>s</div>
+  <div class="result" id="resultDisplay"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5).normalize();
+    scene.add(directionalLight);
+
+    const geometry = new THREE.SphereGeometry(2, 64, 64);
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load('moon_texture.jpg');
+    const material = new THREE.MeshStandardMaterial({ map: texture });
+    const moon = new THREE.Mesh(geometry, material);
+    scene.add(moon);
+
+    camera.position.z = 5;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      moon.rotation.y += 0.002;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      renderer.setSize(width, height);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    });
+
+    function startCountdown(duration) {
+      let timeLeft = duration;
+      const countdownElement = document.getElementById('countdown');
+      countdownElement.innerText = timeLeft;
+      const timer = setInterval(() => {
+        timeLeft--;
+        countdownElement.innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    document.getElementById('detectButton').addEventListener('click', async () => {
+      const fileInput = document.getElementById('fileInput');
+      const resultDisplay = document.getElementById('resultDisplay');
+      const loadingBox = document.getElementById('loadingBox');
+      if (!fileInput.files.length) {
+        alert('Please select a file first.');
+        return;
+      }
+
+      loadingBox.style.display = 'block';
+      startCountdown(10);
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const endpoint = file.type.startsWith('image/') ? '/predict/image/' : '/predict/video/';
+      try {
+        const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        if (response.ok) {
+          resultDisplay.innerHTML = `Detection Completed! <a href="http://127.0.0.1:8000/download/${data.output_path.split('/').pop()}" target="_blank" style="color: yellow;">Download Result</a>`;
+        } else {
+          resultDisplay.innerHTML = `Error: ${data.error}`;
+        }
+      } catch (error) {
+        console.error('Detection failed:', error);
+        resultDisplay.innerHTML = 'Detection failed. Please try again.';
+      } finally {
+        loadingBox.style.display = 'none';
+      }
+    });
+    // Function to show team members on scroll
+function showTeamMembers() {
+  const teamMembers = document.querySelectorAll('.team-member');
+  teamMembers.forEach((member) => {
+    const rect = member.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 50) {
+      member.classList.add('show');
+    }
+  });
+}
+
+// Trigger on scroll and page load
+window.addEventListener('scroll', showTeamMembers);
+window.addEventListener('load', showTeamMembers);
+
+  </script>
+  <div class="team-section" id="teamSection">
+    <div class="team-member">
+      <img src="member.jpg" alt="Member 1" />
+      <h3>Devanshu Mangal</h3>
+      <p>Team Leader</p>
+    </div>
+    <div class="team-member">
+      <img src="member3.jpg" alt="Member 2" />
+      <h3>Dilkhush Yash</h3>
+      <p>Team member</p>
+    </div>
+    <div class="team-member">
+      <img src="member2.jpg" alt="Member 3" />
+      <h3>Dhairya Prajapti</h3>
+      <p>Team member</p>
+    </div>
+  </div>
+</body>
+</html>

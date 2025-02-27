@@ -186,14 +186,19 @@ function startCountdown(duration) {
   let timeLeft = duration;
   const countdownElement = document.getElementById('countdown');
   countdownElement.innerText = timeLeft;
+
   const timer = setInterval(() => {
     timeLeft--;
-    countdownElement.innerText = timeLeft;
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    countdownElement.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    
     if (timeLeft <= 0) {
       clearInterval(timer);
     }
   }, 1000);
 }
+
 
 document.getElementById('detectButton').addEventListener('click', async () => {
   const fileInput = document.getElementById('fileInput');
@@ -206,7 +211,7 @@ document.getElementById('detectButton').addEventListener('click', async () => {
   }
 
   loadingBox.style.display = 'block';
-  startCountdown(10);
+  startCountdown(600);
 
   const file = fileInput.files[0];
   const formData = new FormData();

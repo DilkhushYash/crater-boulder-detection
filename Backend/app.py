@@ -2,9 +2,10 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from ultralytics import YOLO
 import shutil
 import cv2
+import gdown
+from ultralytics import YOLO
 
 app = FastAPI()
 
@@ -17,8 +18,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Google Drive file ID of your best.pt model (replace with your actual file ID)
+GOOGLE_DRIVE_FILE_ID = "1fiIs9w4o5rP6eo-kP1qgHU8VsleiOj1F"
+MODEL_PATH = "model/best.pt"
+
+# Function to download model from Google Drive if not present
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        os.makedirs("model", exist_ok=True)
+        url = f"https://drive.google.com/uc?id={GOOGLE_DRIVE_FILE_ID}"
+        gdown.download(url, MODEL_PATH, quiet=False)
+
+# Download model if not available locally
+download_model()
+
 # Load YOLO model
-model = YOLO("model/best.pt")  # Load your trained model
+model = YOLO(MODEL_PATH)  
 
 # Create necessary directories if they don't exist
 os.makedirs("static/uploads", exist_ok=True)

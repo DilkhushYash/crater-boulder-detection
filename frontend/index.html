@@ -213,13 +213,13 @@
 
       const endpoint = file.type.startsWith('image/') ? '/predict/image/' : '/predict/video/';
       try {
-        const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+        const response = await fetch(`https://crater-boulder-detection.onrender.com/${endpoint}`, {
           method: 'POST',
           body: formData
         });
         const data = await response.json();
         if (response.ok) {
-          resultDisplay.innerHTML = `Detection Completed! <a href="http://127.0.0.1:8000/download/${data.output_path.split('/').pop()}" target="_blank" style="color: yellow;">Download Result</a>`;
+          resultDisplay.innerHTML = `Detection Completed! <a href="https://crater-boulder-detection.onrender.com/download/${data.output_path.split('/').pop()}" target="_blank" style="color: yellow;">Download Result</a>`;
         } else {
           resultDisplay.innerHTML = `Error: ${data.error}`;
         }

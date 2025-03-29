@@ -1,4 +1,4 @@
-🌕 Crater and Boulder Detection Project 🚀
+**🌕 Crater and Boulder Detection Project 🚀**
 
 A YOLO-based web application for detecting craters and boulders from images and videos, with real-time visualization and downloadable results.
 
@@ -82,14 +82,14 @@ npx http-server
  ├── moon.glb                  # 3D moon model  
  └── assets/                   # Team member images and other assets 
 
- Demo:
+ Demo: 
  
 ![image](https://github.com/user-attachments/assets/d5aa973e-3ec1-4edf-8a2a-ac1536766e80)
 ![image](https://github.com/user-attachments/assets/a6f79ff0-39aa-41bf-a900-2e07a12aec2e)
 ![image](https://github.com/user-attachments/assets/b5dd0418-bb81-4e5e-a299-0f15c932d94a)
 ![image](https://github.com/user-attachments/assets/46d8a49f-e4e7-42d4-9e40-654dcf39d0e4)
 
-🛠️ To-Do
+**🛠️ To-Do**
 
  Improve the frontend UI/UX
 
@@ -98,8 +98,8 @@ npx http-server
  Store results in MongoDB for later retrieval
 
  Optimize model inference for faster processing
-
-🤝 Contributors
+**
+🤝 Contributors**
 
 Devanshu Mangal (Team Lead, Backend & Model Integration)
 
